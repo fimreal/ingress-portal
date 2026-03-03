@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ingress-portal
+  namespace: ingress-portal
+  labels:
+    app.kubernetes.io/name: ingress-portal
+    app.kubernetes.io/component: serviceaccount
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ingress-portal
+  labels:
+    app.kubernetes.io/name: ingress-portal
+    app.kubernetes.io/component: clusterrole
+rules:
+  # 读取 Ingress 资源
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+  # 读取 Endpoints (用于健康检查)
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list"]
+  # 读取 Services (可选)
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ingress-portal
+  labels:
+    app.kubernetes.io/name: ingress-portal
+    app.kubernetes.io/component: clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-portal
+subjects:
+  - kind: ServiceAccount
+    name: ingress-portal
+    namespace: ingress-portal

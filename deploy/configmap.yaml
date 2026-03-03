@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-portal-config
+  namespace: ingress-portal
+  labels:
+    app.kubernetes.io/name: ingress-portal
+    app.kubernetes.io/component: configmap
+data:
+  # 服务端口
+  PORT: "8080"
+  # Super Mode 配置
+  SUPER_MODE: "token"
+  TOKEN_TTL: "24"
+  # 可选: 使用密码认证
+  # SUPER_MODE: "password"
+  # SUPER_PASSWORD: "your-secret-password"

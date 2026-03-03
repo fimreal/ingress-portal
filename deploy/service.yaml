@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-portal
+  namespace: ingress-portal
+  labels:
+    app.kubernetes.io/name: ingress-portal
+    app.kubernetes.io/component: service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: ingress-portal
+---
+# 可选: NodePort 服务 (用于外部访问)
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-portal-nodeport
+  namespace: ingress-portal
+  labels:
+    app.kubernetes.io/name: ingress-portal
+    app.kubernetes.io/component: service
+    app.kubernetes.io/variant: nodeport
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 30080  # 可选: 指定 NodePort (范围: 30000-32767)
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: ingress-portal

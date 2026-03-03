@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  ingress-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ingress-portal:latest
+    container_name: ingress-portal
+    ports:
+      - "8080:8080"
+    volumes:
+      # 挂载 kubeconfig 以访问 Kubernetes 集群
+      - ~/.kube:/root/.kube:ro
+      # 挂载 kubeconfig 缓存
+      - ~/.kube/cache:/root/.kube/cache:ro
+    environment:
+      # 服务端口
+      - PORT=8080
+      # Super Mode 配置
+      - SUPER_MODE=token
+      - TOKEN_TTL=24
+      # 可选: 使用密码认证
+      # - SUPER_MODE=password
+      # - SUPER_PASSWORD=your-secret-password
+      # Kubernetes 配置 (如果需要)
+      - KUBECONFIG=/root/.kube/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/ingresses"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - ingress-portal-network
+
+  # 可选: 前端开发服务器 (用于开发环境)
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: ingress-portal-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    profiles:
+      - dev
+    networks:
+      - ingress-portal-network
+
+networks:
+  ingress-portal-network:
+    driver: bridge
+
+# 可选: 添加 Kubernetes 集群 (用于测试)
+# 需要 kind 或 k3d
+# services:
+#   k3s:
+#     image: rancher/k3s:latest
+#     container_name: k3s
+#     privileged: true
+#     command: server --disable-agent
+#     volumes:
+#       - k3s-data:/var/lib/rancher/k3s
+#     profiles:
+#       - k3s
+#
+# volumes:
+#   k3s-data:
