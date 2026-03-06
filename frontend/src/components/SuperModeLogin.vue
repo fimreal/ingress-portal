@@ -60,7 +60,10 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<['close', 'success']>()
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'success'): void
+}>()
 
 const authStore = useAuthStore()
 
